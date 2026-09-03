@@ -4,6 +4,11 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="theme-color" content="#0F1116" />
+    <!-- Stops Safari and Chrome linkifying number strings as phone numbers.
+         Without this a year range like "2024-2025" renders underlined and
+         tappable on the card label, which is the same auto-detection that
+         made a bare 10-digit QR payload offer to dial itself. -->
+    <meta name="format-detection" content="telephone=no,date=no,address=no" />
     <title>SLABD</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
