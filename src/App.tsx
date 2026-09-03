@@ -1,7 +1,9 @@
 import { BrowserRouter, Routes, Route, useSearchParams } from 'react-router-dom'
 import { Home } from './pages/Home'
 import { SignIn } from './pages/SignIn'
-import { Vault } from './pages/Vault'
+import { Dashboard } from './pages/Dashboard'
+import { Cards } from './pages/Cards'
+import { Soon } from './pages/Soon'
 import { Verify } from './pages/Verify'
 
 /** The root path does double duty. A scanned QR arrives as `/?s=<serial>`
@@ -21,7 +23,11 @@ export default function App() {
       <Routes>
         <Route path="/" element={<Root />} />
         <Route path="/signin" element={<SignIn />} />
-        <Route path="/vault" element={<Vault />} />
+        <Route path="/vault" element={<Dashboard />} />
+        <Route path="/vault/cards" element={<Cards />} />
+        <Route path="/vault/wants" element={<Soon title="Want list" feature="Your want list" />} />
+        <Route path="/vault/breaks" element={<Soon title="Breaks" feature="Break tracking" />} />
+        <Route path="/vault/settings" element={<Soon title="Settings" feature="Settings" />} />
         <Route path="*" element={<Root />} />
       </Routes>
     </BrowserRouter>
