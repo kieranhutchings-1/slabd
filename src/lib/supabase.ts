@@ -14,3 +14,30 @@ export const FUNCTIONS_BASE = `${SUPABASE_URL}/functions/v1`
 /** Public URL for a card photo, matching `ImageUploader.publicURL`. */
 export const cardImageUrl = (path: string | null | undefined) =>
   path ? `${SUPABASE_URL}/storage/v1/object/public/card-images/${path}` : null
+
+/** Maps a database row to the shape the shared Slab component wants. */
+export function toSlabCard(c: {
+  player: string
+  year: string | null
+  set_name: string | null
+  auto_type: string | null
+  serial_num: string | null
+  serial_total: string | null
+  serial_kind: string | null
+  grade: string | null
+  unique_serial: string | null
+  image_path: string | null
+}) {
+  return {
+    player: c.player,
+    year: c.year,
+    setName: c.set_name,
+    autoType: c.auto_type,
+    serialNum: c.serial_num,
+    serialTotal: c.serial_total,
+    serialKind: c.serial_kind,
+    grade: c.grade,
+    uniqueSerial: c.unique_serial,
+    imageUrl: cardImageUrl(c.image_path),
+  }
+}

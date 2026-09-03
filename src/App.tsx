@@ -3,6 +3,9 @@ import { Home } from './pages/Home'
 import { SignIn } from './pages/SignIn'
 import { Dashboard } from './pages/Dashboard'
 import { Cards } from './pages/Cards'
+import { CardDetail } from './pages/CardDetail'
+import { CardForm } from './pages/CardForm'
+import { Data } from './pages/Data'
 import { Soon } from './pages/Soon'
 import { Verify } from './pages/Verify'
 
@@ -25,6 +28,11 @@ export default function App() {
         <Route path="/signin" element={<SignIn />} />
         <Route path="/vault" element={<Dashboard />} />
         <Route path="/vault/cards" element={<Cards />} />
+        {/* `new` is declared before `:id` so it isn't captured as a card id. */}
+        <Route path="/vault/cards/new" element={<CardForm />} />
+        <Route path="/vault/cards/:id" element={<CardDetail />} />
+        <Route path="/vault/cards/:id/edit" element={<CardForm />} />
+        <Route path="/vault/data" element={<Data />} />
         <Route path="/vault/wants" element={<Soon title="Want list" feature="Your want list" />} />
         <Route path="/vault/breaks" element={<Soon title="Breaks" feature="Break tracking" />} />
         <Route path="/vault/settings" element={<Soon title="Settings" feature="Settings" />} />

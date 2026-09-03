@@ -7,6 +7,7 @@ import { Wordmark } from './Chrome'
 const nav = [
   { to: '/vault', label: 'Dashboard' },
   { to: '/vault/cards', label: 'My cards' },
+  { to: '/vault/data', label: 'Import / export' },
   { to: '/vault/wants', label: 'Want list' },
   { to: '/vault/breaks', label: 'Breaks' },
   { to: '/vault/settings', label: 'Settings' },

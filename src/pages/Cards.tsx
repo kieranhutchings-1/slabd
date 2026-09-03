@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react'
+import { Link } from 'react-router-dom'
 import { AppShell } from '../components/AppShell'
 import { useCards } from '../hooks/useCards'
 import { cardImageUrl } from '../lib/supabase'
@@ -52,7 +53,7 @@ export function Cards() {
       onSearch={setQuery}
     >
       {/* Filters sit in one row above the content. */}
-      <div className="mb-6 flex flex-wrap gap-2">
+      <div className="mb-6 flex flex-wrap items-center gap-2">
         {CATEGORIES.map((c) => (
           <button
             key={c}
@@ -66,6 +67,19 @@ export function Cards() {
             {c}
           </button>
         ))}
+        <span className="flex-1" />
+        <Link
+          to="/vault/data"
+          className="rounded-full border border-hairline px-4 py-1.5 text-[0.84rem] text-secondary transition-colors hover:text-primary"
+        >
+          Import / export
+        </Link>
+        <Link
+          to="/vault/cards/new"
+          className="rounded-full bg-gradient-to-b from-brass-bright to-brass px-4 py-1.5 text-[0.84rem] font-semibold text-ink transition-opacity hover:opacity-90"
+        >
+          Add card
+        </Link>
       </div>
 
       {loading && (
@@ -82,7 +96,7 @@ export function Cards() {
 
       {!loading && !error && filtered.length === 0 && (
         <p className="py-16 text-center text-[0.9rem] text-tertiary">
-          {cards.length ? 'No cards match that.' : 'No cards yet. Add one in the app.'}
+          {cards.length ? 'No cards match that.' : 'No cards yet. Add one to get started.'}
         </p>
       )}
 
@@ -91,10 +105,11 @@ export function Cards() {
           {filtered.map((c) => {
             const pl = profitLoss(c)
             return (
-              <li
-                key={c.id}
-                className="flex items-center gap-4 p-4 transition-colors hover:bg-raised/60"
-              >
+              <li key={c.id}>
+                <Link
+                  to={`/vault/cards/${c.id}`}
+                  className="flex items-center gap-4 p-4 transition-colors hover:bg-raised/60"
+                >
                 <div className="h-16 w-12 shrink-0 overflow-hidden rounded bg-raised">
                   {cardImageUrl(c.image_path) && (
                     <img
@@ -129,6 +144,9 @@ export function Cards() {
                     {money(Math.abs(pl))}
                   </p>
                 </div>
+
+                <span className="shrink-0 text-tertiary">›</span>
+                </Link>
               </li>
             )
           })}

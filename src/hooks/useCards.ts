@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { supabase } from '../lib/supabase'
 import type { Card } from '../lib/types'
 
@@ -10,22 +10,22 @@ export function useCards() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
-  useEffect(() => {
-    let live = true
-    supabase
+  const load = useCallback(async () => {
+    const { data, error } = await supabase
       .from('cards')
       .select('*')
       .order('date_acquired', { ascending: false })
-      .then(({ data, error }) => {
-        if (!live) return
-        if (error) setError(error.message)
-        else setCards((data ?? []) as Card[])
-        setLoading(false)
-      })
-    return () => {
-      live = false
+    if (error) setError(error.message)
+    else {
+      setError(null)
+      setCards((data ?? []) as Card[])
     }
+    setLoading(false)
   }, [])
 
-  return { cards, loading, error }
+  useEffect(() => {
+    load()
+  }, [load])
+
+  return { cards, loading, error, reload: load }
 }
