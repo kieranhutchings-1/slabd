@@ -36,6 +36,39 @@ export const CSV_COLUMNS = [
 const IMPORTABLE = CSV_COLUMNS.filter((c) => c !== 'id' && c !== 'unique_serial')
 
 const NUMERIC = new Set(['price_paid', 'comp_value', 'sold_price'])
+const DATES = new Set(['date_acquired', 'sold_date'])
+
+/** Normalises a date field to the ISO form the database column expects.
+ *
+ *  Spreadsheet apps re-save a date-shaped column in the machine's local
+ *  style the moment the file is opened and saved again, even untouched. UK
+ *  `14/08/2026` is then either rejected outright by Postgres or, worse,
+ *  silently misread as a month when the day is 12 or under. The iOS
+ *  importer already guards against this; the web importer has to agree, or
+ *  the same file behaves differently depending which one opened it.
+ *
+ *  An unrecognised value is passed through rather than dropped, so the
+ *  database rejects it visibly instead of the row losing a date quietly. */
+function normalizeDate(raw: string): string {
+  const v = raw.trim()
+  if (/^\d{4}-\d{2}-\d{2}$/.test(v)) return v
+
+  const m = v.match(/^(\d{1,4})[/.-](\d{1,2})[/.-](\d{2,4})$/)
+  if (!m) return v
+
+  const pad = (n: string) => n.padStart(2, '0')
+  // yyyy/MM/dd
+  if (m[1].length === 4) return `${m[1]}-${pad(m[2])}-${pad(m[3])}`
+
+  const a = Number(m[1])
+  const b = Number(m[2])
+  const year = m[3].length === 2 ? `20${m[3]}` : m[3]
+  // Day-first unless the first number can only be a month, matching the
+  // app's preference order (dd/MM before MM/dd).
+  const [day, month] = a > 12 && b <= 12 ? [a, b] : b > 12 ? [b, a] : [a, b]
+  if (day < 1 || day > 31 || month < 1 || month > 12) return v
+  return `${year}-${pad(String(month))}-${pad(String(day))}`
+}
 
 const escape = (v: string) => (/[",\r\n]/.test(v) ? `"${v.replace(/"/g, '""')}"` : v)
 
@@ -132,7 +165,14 @@ export function parseCards(text: string): { rows: ParsedRow[]; skipped: number }
     const values: Record<string, string | number | null> = {}
     for (const col of present) {
       const v = get(col)
-      values[col] = v === '' ? null : NUMERIC.has(col) ? (Number(v) || null) : v
+      values[col] =
+        v === ''
+          ? null
+          : NUMERIC.has(col)
+            ? Number(v) || null
+            : DATES.has(col)
+              ? normalizeDate(v)
+              : v
     }
 
     const id = idIndex >= 0 ? line[idIndex]?.trim() || null : null
