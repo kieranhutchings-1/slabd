@@ -5,7 +5,9 @@ import { Slab } from '../components/Slab'
 import { Field, Section, Select, TextArea, TextInput, Toggle } from '../components/Field'
 import { useCard } from '../hooks/useCard'
 import { useCards } from '../hooks/useCards'
-import { supabase } from '../lib/supabase'
+import { PhotoPicker } from '../components/PhotoPicker'
+import { cardImageUrl, supabase } from '../lib/supabase'
+import { deleteCardImage, uploadCardImage } from '../lib/images'
 import { AUTO_TYPES, CATEGORIES, GRADES, SERIAL_KINDS, SOURCES, STATUSES } from '../lib/options'
 import { gradeName } from '../lib/types'
 
@@ -68,6 +70,8 @@ export function CardForm() {
 
   const [d, setD] = useState<Draft>(EMPTY)
   const [graded, setGraded] = useState(false)
+  const [photo, setPhoto] = useState<File | null>(null)
+  const [photoRemoved, setPhotoRemoved] = useState(false)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
@@ -107,6 +111,19 @@ export function CardForm() {
 
   const set = <K extends keyof Draft>(k: K, v: Draft[K]) => setD((p) => ({ ...p, [k]: v }))
 
+  // Local preview of a newly chosen photo, so the slab shows the real card
+  // before anything is uploaded.
+  const [photoPreview, setPhotoPreview] = useState<string | null>(null)
+  useEffect(() => {
+    if (!photo) {
+      setPhotoPreview(null)
+      return
+    }
+    const url = URL.createObjectURL(photo)
+    setPhotoPreview(url)
+    return () => URL.revokeObjectURL(url)
+  }, [photo])
+
   async function save() {
     if (!d.player.trim()) {
       setError('A card needs a player name.')
@@ -115,7 +132,33 @@ export function CardForm() {
     setSaving(true)
     setError(null)
 
+    const { data: auth } = await supabase.auth.getUser()
+    const userId = auth.user?.id
+    if (!userId) {
+      setError('Your session has expired. Sign in again.')
+      setSaving(false)
+      return
+    }
+
+    // Upload the photo before writing the row, so a failed upload can't leave
+    // the card pointing at a path that doesn't exist. The previous photo is
+    // only deleted once the new one is safely attached — same order as the app.
+    const previousPath = card?.image_path ?? null
+    let imagePath = previousPath
+    if (photo) {
+      try {
+        imagePath = await uploadCardImage(photo, userId)
+      } catch (e) {
+        setError(`Photo didn't upload: ${e instanceof Error ? e.message : 'unknown error'}`)
+        setSaving(false)
+        return
+      }
+    } else if (photoRemoved) {
+      imagePath = null
+    }
+
     const payload = {
+      image_path: imagePath,
       player: d.player.trim(),
       category: d.category,
       year: str(d.year),
@@ -139,6 +182,12 @@ export function CardForm() {
       notes: str(d.notes),
     }
 
+    // A photo that's been replaced or removed is only cleaned up after the row
+    // is saved — if the write fails, the card still points at it.
+    const cleanUp = async () => {
+      if (previousPath && previousPath !== imagePath) await deleteCardImage(previousPath)
+    }
+
     if (editing) {
       const { error } = await supabase.from('cards').update(payload).eq('id', id!)
       if (error) {
@@ -146,14 +195,14 @@ export function CardForm() {
         setSaving(false)
         return
       }
+      await cleanUp()
       navigate(`/vault/cards/${id}`)
     } else {
       // user_id has to be set explicitly: the row-level security policy checks
       // it, and the database has no default for it.
-      const { data: auth } = await supabase.auth.getUser()
       const { data, error } = await supabase
         .from('cards')
-        .insert({ ...payload, user_id: auth.user?.id })
+        .insert({ ...payload, user_id: userId })
         .select('id')
         .single()
       if (error) {
@@ -176,7 +225,7 @@ export function CardForm() {
     serialKind: d.serial_kind,
     grade: graded ? d.grade : null,
     uniqueSerial: card?.unique_serial ?? null,
-    imageUrl: null,
+    imageUrl: photoPreview ?? (photoRemoved ? null : cardImageUrl(card?.image_path ?? null)),
   }
 
   return (
@@ -226,6 +275,23 @@ export function CardForm() {
               <Field label="Type">
                 <Select value={d.auto_type} onChange={(v) => set('auto_type', v)} options={AUTO_TYPES} />
               </Field>
+            </Section>
+
+            <Section title="Photo">
+              <PhotoPicker
+                existingUrl={cardImageUrl(card?.image_path ?? null)}
+                file={photo}
+                removed={photoRemoved}
+                onPick={(f) => {
+                  setPhoto(f)
+                  setPhotoRemoved(false)
+                }}
+                onRemove={() => {
+                  setPhoto(null)
+                  setPhotoRemoved(true)
+                }}
+                onRestore={() => setPhotoRemoved(false)}
+              />
             </Section>
 
             <Section title="Serial and grade">
@@ -357,7 +423,7 @@ export function CardForm() {
             <Slab card={preview} />
             <p className="mt-3 px-1 text-[0.76rem] text-tertiary">
               {editing
-                ? 'Photos are added in the app.'
+                ? 'Changes go live everywhere as soon as you save.'
                 : 'A Slabd serial and QR code are assigned when you save.'}
             </p>
           </div>
