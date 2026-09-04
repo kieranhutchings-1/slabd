@@ -22,6 +22,7 @@ export interface Card {
   sold_date: string | null
   notes: string | null
   image_path: string | null
+  thumb_path: string | null
   grade: string | null
   unique_serial: string | null
   break_spot_id: string | null

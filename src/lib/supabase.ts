@@ -41,3 +41,9 @@ export function toSlabCard(c: {
     imageUrl: cardImageUrl(c.image_path),
   }
 }
+
+/** List-sized copy of a card's photo, falling back to the full image when a
+ *  card has no thumbnail yet — an older upload, or one whose thumbnail failed. */
+export function cardThumbUrl(card: { image_path: string | null; thumb_path: string | null }) {
+  return cardImageUrl(card.thumb_path) ?? cardImageUrl(card.image_path)
+}

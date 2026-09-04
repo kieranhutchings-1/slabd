@@ -4,7 +4,7 @@ import { AppShell } from '../components/AppShell'
 import { Field, TextInput } from '../components/Field'
 import { useBreaks } from '../hooks/useBreaks'
 import { useCards } from '../hooks/useCards'
-import { supabase, cardImageUrl } from '../lib/supabase'
+import { supabase, cardThumbUrl } from '../lib/supabase'
 import { hitsFor, perHitCost, spotProfitLoss, percent, type BreakSpot } from '../lib/breaks'
 import { money, signedMoney } from '../lib/format'
 
@@ -313,9 +313,9 @@ export function BreakDetail() {
                               className="flex items-center gap-3 rounded-lg py-1 transition-colors hover:bg-raised/60"
                             >
                               <div className="h-9 w-7 shrink-0 overflow-hidden rounded bg-raised">
-                                {cardImageUrl(c.image_path) && (
+                                {cardThumbUrl(c) && (
                                   <img
-                                    src={cardImageUrl(c.image_path)!}
+                                    src={cardThumbUrl(c)!}
                                     alt=""
                                     loading="lazy"
                                     className="h-full w-full object-cover"

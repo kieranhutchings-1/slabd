@@ -181,10 +181,14 @@ export function CardForm() {
     // the card pointing at a path that doesn't exist. The previous photo is
     // only deleted once the new one is safely attached — same order as the app.
     const previousPath = card?.image_path ?? null
+    const previousThumb = card?.thumb_path ?? null
     let imagePath = previousPath
+    let thumbPath = previousThumb
     if (photo) {
       try {
-        imagePath = await uploadCardImage(photo, userId)
+        const uploaded = await uploadCardImage(photo, userId)
+        imagePath = uploaded.path
+        thumbPath = uploaded.thumbPath
       } catch (e) {
         setError(`Photo didn't upload: ${e instanceof Error ? e.message : 'unknown error'}`)
         setSaving(false)
@@ -192,10 +196,12 @@ export function CardForm() {
       }
     } else if (photoRemoved) {
       imagePath = null
+      thumbPath = null
     }
 
     const payload = {
       image_path: imagePath,
+      thumb_path: thumbPath,
       player: d.player.trim(),
       category: d.category,
       year: str(d.year),
@@ -224,7 +230,9 @@ export function CardForm() {
     // A photo that's been replaced or removed is only cleaned up after the row
     // is saved — if the write fails, the card still points at it.
     const cleanUp = async () => {
-      if (previousPath && previousPath !== imagePath) await deleteCardImage(previousPath)
+      if (previousPath && previousPath !== imagePath) {
+        await deleteCardImage(previousPath, previousThumb)
+      }
     }
 
 

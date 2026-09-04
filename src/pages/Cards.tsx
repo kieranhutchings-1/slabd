@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom'
 import { AppShell } from '../components/AppShell'
 import { useCards } from '../hooks/useCards'
 import { useCategories } from '../hooks/useCategories'
-import { cardImageUrl } from '../lib/supabase'
+import { cardThumbUrl } from '../lib/supabase'
 import { money, profitLoss } from '../lib/format'
 import { gradeName } from '../lib/types'
 import { DEFAULT_SORT, SORTS, sortCards, type Sort } from '../lib/sort'
@@ -146,9 +146,9 @@ export function Cards() {
                   className="flex items-center gap-4 p-4 transition-colors hover:bg-raised/60"
                 >
                 <div className="h-16 w-12 shrink-0 overflow-hidden rounded bg-raised">
-                  {cardImageUrl(c.image_path) && (
+                  {cardThumbUrl(c) && (
                     <img
-                      src={cardImageUrl(c.image_path)!}
+                      src={cardThumbUrl(c)!}
                       alt=""
                       loading="lazy"
                       className="h-full w-full object-cover"

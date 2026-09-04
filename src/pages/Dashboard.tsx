@@ -3,7 +3,7 @@ import { AppShell } from '../components/AppShell'
 import { useCards } from '../hooks/useCards'
 import { deriveStats } from '../lib/stats'
 import { money } from '../lib/format'
-import { cardImageUrl } from '../lib/supabase'
+import { cardThumbUrl } from '../lib/supabase'
 import { useSnapshots } from '../hooks/useSnapshots'
 import { ValueChart } from '../components/ValueChart'
 
@@ -143,9 +143,9 @@ export function Dashboard() {
                   {s.topCards.map((c) => (
                     <li key={c.id} className="flex items-center gap-3">
                       <div className="h-12 w-9 shrink-0 overflow-hidden rounded bg-raised">
-                        {cardImageUrl(c.image_path) && (
+                        {cardThumbUrl(c) && (
                           <img
-                            src={cardImageUrl(c.image_path)!}
+                            src={cardThumbUrl(c)!}
                             alt=""
                             loading="lazy"
                             className="h-full w-full object-cover"
