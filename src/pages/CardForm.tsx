@@ -11,7 +11,6 @@ import { PhotoPicker } from '../components/PhotoPicker'
 import { CategoryPicker } from '../components/CategoryPicker'
 import { cardImageUrl, supabase } from '../lib/supabase'
 import { deleteCardImage, uploadCardImage } from '../lib/images'
-import { reallocateSpots } from '../lib/allocate'
 import { AUTO_TYPES, GRADES, SERIAL_KINDS, SOURCES, STATUSES } from '../lib/options'
 import { gradeName } from '../lib/types'
 
@@ -228,23 +227,6 @@ export function CardForm() {
       if (previousPath && previousPath !== imagePath) await deleteCardImage(previousPath)
     }
 
-    // Moving a card between spots changes the per-hit split on both sides: the
-    // spot it left now has one fewer hit to divide across, and the one it
-    // joined has one more. Both have to be recalculated, or the money stops
-    // adding up.
-    const previousSpotId = card?.break_spot_id ?? null
-    const nextSpotId = payload.break_spot_id
-    const touched = spots.filter(
-      (s) => (previousSpotId && s.id === previousSpotId) || (nextSpotId && s.id === nextSpotId),
-    )
-    const settleAllocation = async () => {
-      if (touched.length === 0) return
-      const err = await reallocateSpots(touched)
-      // The card itself saved fine, so this is a warning rather than a failure
-      // — but it has to be visible, because a silently wrong allocation is
-      // worse than a loud one.
-      if (err) setError(`Card saved, but re-splitting the spot cost failed: ${err}`)
-    }
 
     if (editing) {
       const { error } = await supabase.from('cards').update(payload).eq('id', id!)
@@ -254,7 +236,6 @@ export function CardForm() {
         return
       }
       await cleanUp()
-      await settleAllocation()
       navigate(`/vault/cards/${id}`)
     } else {
       // user_id has to be set explicitly: the row-level security policy checks
@@ -269,7 +250,6 @@ export function CardForm() {
         setSaving(false)
         return
       }
-      await settleAllocation()
       navigate(`/vault/cards/${data.id}`)
     }
   }

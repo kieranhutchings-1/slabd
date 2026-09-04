@@ -5,7 +5,6 @@ import { Field, TextInput } from '../components/Field'
 import { useBreaks } from '../hooks/useBreaks'
 import { useCards } from '../hooks/useCards'
 import { supabase, cardImageUrl } from '../lib/supabase'
-import { reallocateSpot } from '../lib/allocate'
 import { hitsFor, perHitCost, spotProfitLoss, percent, type BreakSpot } from '../lib/breaks'
 import { money, signedMoney } from '../lib/format'
 
@@ -62,38 +61,30 @@ export function BreakDetail() {
     setBusy(true)
     setError(null)
 
-    let saved: BreakSpot | null = null
     if (editingSpot === 'new') {
       const { data: auth } = await supabase.auth.getUser()
-      const { data, error } = await supabase
+      const { error } = await supabase
         .from('break_spots')
         .insert({ break_id: id, user_id: auth.user?.id, name, cost: costValue })
-        .select('*')
-        .single()
       if (error) {
         setError(error.message)
         setBusy(false)
         return
       }
-      saved = { ...(data as BreakSpot), cost: Number(data.cost) }
     } else {
-      const { data, error } = await supabase
+      const { error } = await supabase
         .from('break_spots')
         .update({ name, cost: costValue })
         .eq('id', editingSpot!)
-        .select('*')
-        .single()
       if (error) {
         setError(error.message)
         setBusy(false)
         return
       }
-      saved = { ...(data as BreakSpot), cost: Number(data.cost) }
     }
 
-    // The cost changed, so every hit's share of it changed too.
-    const allocErr = await reallocateSpot(saved)
-    if (allocErr) setError(`Spot saved, but re-splitting its cost failed: ${allocErr}`)
+    // The database re-splits the cost across this spot's hits on its own — see
+    // the break allocation trigger — so this only has to reload.
 
     await Promise.all([reload(), reloadCards()])
     setEditingSpot(null)
