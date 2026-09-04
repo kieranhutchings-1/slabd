@@ -5,9 +5,11 @@ import { Slab } from '../components/Slab'
 import { Field, Section, Select, TextArea, TextInput, Toggle } from '../components/Field'
 import { useCard } from '../hooks/useCard'
 import { useCards } from '../hooks/useCards'
+import { useBreaks } from '../hooks/useBreaks'
 import { PhotoPicker } from '../components/PhotoPicker'
 import { cardImageUrl, supabase } from '../lib/supabase'
 import { deleteCardImage, uploadCardImage } from '../lib/images'
+import { reallocateSpots } from '../lib/allocate'
 import { AUTO_TYPES, CATEGORIES, GRADES, SERIAL_KINDS, SOURCES, STATUSES } from '../lib/options'
 import { gradeName } from '../lib/types'
 
@@ -20,6 +22,7 @@ interface Draft {
   serial_num: string
   serial_total: string
   serial_kind: string
+  break_spot_id: string
   grade: string
   source: string
   seller: string
@@ -42,6 +45,7 @@ const EMPTY: Draft = {
   serial_num: '',
   serial_total: '',
   serial_kind: 'Base',
+  break_spot_id: '',
   grade: '',
   source: 'Single Purchase',
   seller: '',
@@ -67,6 +71,7 @@ export function CardForm() {
   const navigate = useNavigate()
   const { card, loading } = useCard(id)
   const { cards } = useCards()
+  const { breaks, spots } = useBreaks()
 
   const [d, setD] = useState<Draft>(EMPTY)
   const [graded, setGraded] = useState(false)
@@ -94,6 +99,7 @@ export function CardForm() {
       serial_num: card.serial_num ?? '',
       serial_total: card.serial_total ?? '',
       serial_kind: card.serial_kind ?? 'Base',
+      break_spot_id: card.break_spot_id ?? '',
       grade: card.grade ?? '',
       source: card.source ?? 'Single Purchase',
       seller: card.seller ?? '',
@@ -110,6 +116,18 @@ export function CardForm() {
   }, [card])
 
   const set = <K extends keyof Draft>(k: K, v: Draft[K]) => setD((p) => ({ ...p, [k]: v }))
+
+  // Spots labelled with their break, because a spot name on its own ("Man
+  // Utd") says nothing about which break it belongs to.
+  const spotOptions = useMemo(() => {
+    const breakName = new Map(breaks.map((b) => [b.id, b.name]))
+    return spots
+      .map((s) => ({
+        id: s.id,
+        label: `${breakName.get(s.break_id) ?? 'Unknown break'} — ${s.name}`,
+      }))
+      .sort((a, b) => a.label.localeCompare(b.label))
+  }, [breaks, spots])
 
   // Local preview of a newly chosen photo, so the slab shows the real card
   // before anything is uploaded.
@@ -167,6 +185,8 @@ export function CardForm() {
       serial_num: str(d.serial_num),
       serial_total: str(d.serial_total),
       serial_kind: d.serial_kind,
+      // A card only belongs to a spot if it came from a break.
+      break_spot_id: d.source === 'Break' && d.break_spot_id ? d.break_spot_id : null,
       // Clearing the toggle must clear the stored grade, or an ungraded card
       // keeps rendering a grade block on its slab.
       grade: graded ? str(d.grade) : null,
@@ -188,6 +208,24 @@ export function CardForm() {
       if (previousPath && previousPath !== imagePath) await deleteCardImage(previousPath)
     }
 
+    // Moving a card between spots changes the per-hit split on both sides: the
+    // spot it left now has one fewer hit to divide across, and the one it
+    // joined has one more. Both have to be recalculated, or the money stops
+    // adding up.
+    const previousSpotId = card?.break_spot_id ?? null
+    const nextSpotId = payload.break_spot_id
+    const touched = spots.filter(
+      (s) => (previousSpotId && s.id === previousSpotId) || (nextSpotId && s.id === nextSpotId),
+    )
+    const settleAllocation = async () => {
+      if (touched.length === 0) return
+      const err = await reallocateSpots(touched)
+      // The card itself saved fine, so this is a warning rather than a failure
+      // — but it has to be visible, because a silently wrong allocation is
+      // worse than a loud one.
+      if (err) setError(`Card saved, but re-splitting the spot cost failed: ${err}`)
+    }
+
     if (editing) {
       const { error } = await supabase.from('cards').update(payload).eq('id', id!)
       if (error) {
@@ -196,6 +234,7 @@ export function CardForm() {
         return
       }
       await cleanUp()
+      await settleAllocation()
       navigate(`/vault/cards/${id}`)
     } else {
       // user_id has to be set explicitly: the row-level security policy checks
@@ -210,6 +249,7 @@ export function CardForm() {
         setSaving(false)
         return
       }
+      await settleAllocation()
       navigate(`/vault/cards/${data.id}`)
     }
   }
@@ -358,6 +398,32 @@ export function CardForm() {
                   />
                 </Field>
               </div>
+
+              {/* Only offered for a break-sourced card, since a spot only
+                  exists inside a break. */}
+              {d.source === 'Break' && (
+                <Field
+                  label="Break spot"
+                  hint={
+                    spotOptions.length === 0
+                      ? 'No spots yet — add a break and its spots first.'
+                      : "Price paid is worked out for you: the spot's cost split across its hits."
+                  }
+                >
+                  <select
+                    value={d.break_spot_id}
+                    onChange={(e) => set('break_spot_id', e.target.value)}
+                    className="w-full cursor-pointer rounded-xl border border-hairline bg-raised px-3.5 py-2.5 text-[0.9rem] text-primary focus:border-brass/60 focus:outline-none"
+                  >
+                    <option value="">Not from a spot</option>
+                    {spotOptions.map((o) => (
+                      <option key={o.id} value={o.id}>
+                        {o.label}
+                      </option>
+                    ))}
+                  </select>
+                </Field>
+              )}
             </Section>
 
             <Section title="Value and status">

@@ -24,6 +24,7 @@ export interface Card {
   image_path: string | null
   grade: string | null
   unique_serial: string | null
+  break_spot_id: string | null
 }
 
 /** The shape the public `card-data` edge function returns. Deliberately a
