@@ -5,6 +5,7 @@ import { useCards } from '../hooks/useCards'
 import { cardImageUrl } from '../lib/supabase'
 import { money, profitLoss } from '../lib/format'
 import { gradeName } from '../lib/types'
+import { DEFAULT_SORT, SORTS, sortCards, type Sort } from '../lib/sort'
 
 const CATEGORIES = ['All', 'Football', 'WWE', 'Pokemon', 'Other']
 
@@ -33,17 +34,28 @@ export function Cards() {
   const { cards, loading, error } = useCards()
   const [query, setQuery] = useState('')
   const [category, setCategory] = useState('All')
+  // Remembered per browser, the way the app remembers it per device — a
+  // chosen order is a preference, not a one-off.
+  const [sort, setSort] = useState<Sort>(() => {
+    try {
+      const saved = localStorage.getItem('slabd.sort')
+      return SORTS.includes(saved as Sort) ? (saved as Sort) : DEFAULT_SORT
+    } catch {
+      return DEFAULT_SORT
+    }
+  })
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase()
-    return cards.filter((c) => {
+    const matches = cards.filter((c) => {
       if (category !== 'All' && c.category !== category) return false
       if (!q) return true
       return [c.player, c.year, c.set_name, c.auto_type, c.seller, c.unique_serial]
         .filter(Boolean)
         .some((f) => f!.toLowerCase().includes(q))
     })
-  }, [cards, query, category])
+    return sortCards(matches, sort)
+  }, [cards, query, category, sort])
 
   return (
     <AppShell
@@ -68,6 +80,29 @@ export function Cards() {
           </button>
         ))}
         <span className="flex-1" />
+        <label className="flex items-center gap-2 text-[0.84rem] text-secondary">
+          <span className="sr-only">Sort by</span>
+          <select
+            value={sort}
+            onChange={(e) => {
+              const next = e.target.value as Sort
+              setSort(next)
+              try {
+                localStorage.setItem('slabd.sort', next)
+              } catch {
+                // A browser with site data blocked still sorts; it just
+                // won't remember the choice next visit.
+              }
+            }}
+            className="cursor-pointer rounded-full border border-hairline bg-surface px-4 py-1.5 text-[0.84rem] text-secondary transition-colors hover:text-primary focus:border-brass/60 focus:outline-none"
+          >
+            {SORTS.map((s) => (
+              <option key={s} value={s}>
+                {s}
+              </option>
+            ))}
+          </select>
+        </label>
         <Link
           to="/vault/data"
           className="rounded-full border border-hairline px-4 py-1.5 text-[0.84rem] text-secondary transition-colors hover:text-primary"
