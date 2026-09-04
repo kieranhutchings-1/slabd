@@ -2,6 +2,7 @@ import { type ReactNode } from 'react'
 import { Link, NavLink, Navigate, useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../hooks/useAuth'
+import { useCurrency } from '../hooks/useCurrency'
 import { Wordmark } from './Chrome'
 
 const nav = [
@@ -28,6 +29,9 @@ export function AppShell({
   onSearch?: (v: string) => void
 }) {
   const { session, loading } = useAuth()
+  // Subscribed here rather than per page: every `money()` call below reads
+  // module state, so this is what makes a currency change repaint the vault.
+  useCurrency()
   const navigate = useNavigate()
 
   if (loading) {

@@ -7,6 +7,8 @@ import { useCards } from '../hooks/useCards'
 import { useBreaks } from '../hooks/useBreaks'
 import { useWants } from '../hooks/useWants'
 import { useCategories } from '../hooks/useCategories'
+import { useCurrency } from '../hooks/useCurrency'
+import { CURRENCIES, CURRENCY_LABELS, type CurrencyCode } from '../lib/currency'
 import { suggestCategories } from '../lib/categories'
 import { supabase } from '../lib/supabase'
 
@@ -299,6 +301,113 @@ function ChangePassword() {
   )
 }
 
+function CurrencyChoice() {
+  const { currency, change } = useCurrency()
+  const [busy, setBusy] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+
+  return (
+    <div className="max-w-sm">
+      <select
+        value={currency}
+        disabled={busy}
+        onChange={async (e) => {
+          setBusy(true)
+          setError(null)
+          const err = await change(e.target.value as CurrencyCode)
+          setBusy(false)
+          if (err) setError(err)
+        }}
+        className="w-full cursor-pointer rounded-xl border border-hairline bg-raised px-3.5 py-2.5 text-[0.9rem] text-primary focus:border-brass/60 focus:outline-none disabled:opacity-50"
+      >
+        {CURRENCIES.map((c) => (
+          <option key={c} value={c}>
+            {CURRENCY_LABELS[c]}
+          </option>
+        ))}
+      </select>
+      {error && <p className="mt-2 text-[0.82rem] text-loss">{error}</p>}
+    </div>
+  )
+}
+
+/** Deletes the account for real, via an edge function.
+ *
+ *  A client can't remove an auth user — that needs the service role, which
+ *  must never reach a browser — so the function verifies the caller's own
+ *  token and deletes only their account. */
+function DeleteAccount({ email, cardCount }: { email: string; cardCount: number }) {
+  const [open, setOpen] = useState(false)
+  const [confirm, setConfirm] = useState('')
+  const [busy, setBusy] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+
+  async function destroy() {
+    if (confirm.trim().toUpperCase() !== 'DELETE') {
+      setError('Type DELETE to confirm.')
+      return
+    }
+    setBusy(true)
+    setError(null)
+    const { error } = await supabase.functions.invoke('delete-account', {
+      body: { confirm: 'DELETE' },
+    })
+    if (error) {
+      setError(error.message)
+      setBusy(false)
+      return
+    }
+    await supabase.auth.signOut()
+    window.location.href = '/'
+  }
+
+  if (!open) {
+    return (
+      <button
+        onClick={() => {
+          setOpen(true)
+          setConfirm('')
+          setError(null)
+        }}
+        className="cursor-pointer rounded-full border border-hairline px-5 py-2.5 text-[0.88rem] text-secondary transition-colors hover:border-loss/50 hover:text-loss"
+      >
+        Delete my account
+      </button>
+    )
+  }
+
+  return (
+    <div className="max-w-md rounded-xl border border-loss/40 bg-loss/5 p-5">
+      <p className="text-[0.88rem] leading-relaxed text-primary">
+        This removes {cardCount} card{cardCount === 1 ? '' : 's'}, their photos, your breaks, your
+        want list and the account for {email}. It cannot be undone.
+      </p>
+      <input
+        value={confirm}
+        onChange={(e) => setConfirm(e.target.value)}
+        placeholder="Type DELETE"
+        className="mt-4 w-full rounded-xl border border-hairline bg-ink px-3.5 py-2.5 text-[0.9rem] text-primary placeholder:text-tertiary focus:border-loss/60 focus:outline-none"
+      />
+      {error && <p className="mt-2 text-[0.82rem] text-loss">{error}</p>}
+      <div className="mt-4 flex items-center gap-3">
+        <button
+          onClick={destroy}
+          disabled={busy}
+          className="cursor-pointer rounded-full bg-loss px-5 py-2.5 text-[0.88rem] font-semibold text-ink transition-opacity hover:opacity-90 disabled:opacity-50"
+        >
+          {busy ? 'Deleting…' : 'Delete for ever'}
+        </button>
+        <button
+          onClick={() => setOpen(false)}
+          className="cursor-pointer text-[0.88rem] text-secondary transition-colors hover:text-primary"
+        >
+          Cancel
+        </button>
+      </div>
+    </div>
+  )
+}
+
 export function Settings() {
   const { session } = useAuth()
   const { cards } = useCards()
@@ -323,6 +432,13 @@ export function Settings() {
               </dd>
             </div>
           </dl>
+        </Panel>
+
+        <Panel
+          title="Currency"
+          note="The currency your amounts are in. This changes the symbol, not the numbers — nothing is converted, so switching won't rewrite what you've already entered."
+        >
+          <CurrencyChoice />
         </Panel>
 
         <Panel
@@ -353,14 +469,9 @@ export function Settings() {
 
         <Panel
           title="Closing your account"
-          note="This removes your collection, photos and account for good. It can't be undone, so it's handled by hand rather than behind a button — export your data first if you want to keep a copy."
+          note="This removes your collection, photos and account for good, straight away. Export your data first if you want to keep a copy."
         >
-          <a
-            href={`mailto:hello@slabd.app?subject=${encodeURIComponent('Close my SLABD account')}&body=${encodeURIComponent(`Please close the SLABD account registered to ${email} and delete my data.`)}`}
-            className="inline-block rounded-full border border-hairline px-5 py-2.5 text-[0.88rem] text-secondary transition-colors hover:border-loss/50 hover:text-loss"
-          >
-            Request account deletion
-          </a>
+          <DeleteAccount email={email} cardCount={cards.length} />
         </Panel>
 
         <Panel title="About">

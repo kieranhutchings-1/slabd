@@ -1,8 +1,8 @@
-/** Sterling, matching the app's `Money.format`. */
-export const money = (value: number | null | undefined) =>
-  value == null
-    ? '—'
-    : new Intl.NumberFormat('en-GB', { style: 'currency', currency: 'GBP' }).format(value)
+import { formatMoney } from './currency'
+
+/** Formats in the user's chosen currency, matching the app's `Money.format`.
+ *  See `currency.ts` — switching relabels amounts rather than converting them. */
+export const money = formatMoney
 
 export const signedMoney = (value: number) =>
   `${value >= 0 ? '+' : '−'}${money(Math.abs(value))}`
