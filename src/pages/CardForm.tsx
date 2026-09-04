@@ -60,6 +60,17 @@ const EMPTY: Draft = {
   notes: '',
 }
 
+/** Digits, with an optional leading minus.
+ *
+ *  Printed serials aren't always positive whole numbers — some Topps Chrome
+ *  parallels are numbered oddly, a Frozen Fractor numbered -3/0 among them —
+ *  so the field has to accept a minus while still refusing everything else. */
+const sanitizeSerial = (raw: string) => {
+  const negative = raw.startsWith('-')
+  const digits = raw.replace(/\D/g, '')
+  return negative ? `-${digits}` : digits
+}
+
 const num = (v: string) => {
   const n = Number(v.replace(/[^0-9.-]/g, ''))
   return v.trim() === '' || Number.isNaN(n) ? null : n
@@ -351,8 +362,10 @@ export function CardForm() {
                   <Field label="Number">
                     <TextInput
                       value={d.serial_num}
-                      onChange={(v) => set('serial_num', v)}
-                      inputMode="numeric"
+                      onChange={(v) => set('serial_num', sanitizeSerial(v))}
+                      // Not inputMode="numeric": that keypad has no minus on
+                      // a phone, and a printed serial isn't always positive.
+                      inputMode="text"
                       placeholder="10"
                     />
                   </Field>

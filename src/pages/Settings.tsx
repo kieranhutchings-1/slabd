@@ -11,6 +11,7 @@ import { useCurrency } from '../hooks/useCurrency'
 import { CURRENCIES, CURRENCY_LABELS, type CurrencyCode } from '../lib/currency'
 import { suggestCategories } from '../lib/categories'
 import { supabase } from '../lib/supabase'
+import { FeedbackForm } from '../components/FeedbackForm'
 
 const MIN_PASSWORD = 8
 
@@ -472,6 +473,13 @@ export function Settings() {
           note="This removes your collection, photos and account for good, straight away. Export your data first if you want to keep a copy."
         >
           <DeleteAccount email={email} cardCount={cards.length} />
+        </Panel>
+
+        <Panel
+          title="Report a bug or request a feature"
+          note="Goes straight to the person building it. During beta this is the fastest way to change what SLABD does."
+        >
+          <FeedbackForm />
         </Panel>
 
         <Panel title="About">
