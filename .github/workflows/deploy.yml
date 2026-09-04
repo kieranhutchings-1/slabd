@@ -30,6 +30,17 @@ jobs:
       # take over instead. The QR route stays on `/?s=…` so it still gets a
       # real 200.
       - run: cp dist/index.html dist/404.html
+      # The 404 fallback renders the right page but answers with a 404 status.
+      # That's fine for a stray URL and invisible to a person, but not for a
+      # page something machine-readable has to fetch: App Store review checks
+      # the privacy policy URL, and a crawler treats 404 as "gone". Giving the
+      # real routes their own index.html means they answer 200.
+      - name: Give real routes a 200
+        run: |
+          for route in privacy terms reset signin vault; do
+            mkdir -p "dist/$route"
+            cp dist/index.html "dist/$route/index.html"
+          done
       - uses: actions/upload-pages-artifact@v3
         with:
           path: dist
