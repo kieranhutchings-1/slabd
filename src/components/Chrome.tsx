@@ -67,6 +67,19 @@ export function Footer() {
         <p className="text-[0.78rem] text-tertiary">
           A collection belongs in a vault, not a shoebox.
         </p>
+        <p className="text-[0.78rem] text-tertiary">
+          <Link to="/privacy" className="transition-colors hover:text-secondary">
+            Privacy
+          </Link>
+          <span className="px-2">·</span>
+          <Link to="/terms" className="transition-colors hover:text-secondary">
+            Terms
+          </Link>
+          <span className="px-2">·</span>
+          <a href="mailto:hello@slabd.app" className="transition-colors hover:text-secondary">
+            hello@slabd.app
+          </a>
+        </p>
       </div>
     </footer>
   )

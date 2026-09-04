@@ -6,7 +6,7 @@ import { Wordmark } from '../components/Chrome'
 
 export function SignIn() {
   const { session, loading } = useAuth()
-  const [mode, setMode] = useState<'in' | 'up'>('in')
+  const [mode, setMode] = useState<'in' | 'up' | 'forgot'>('in')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [busy, setBusy] = useState(false)
@@ -21,6 +21,19 @@ export function SignIn() {
     setError(null)
     setNotice(null)
 
+    if (mode === 'forgot') {
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/reset`,
+      })
+      if (error) setError(error.message)
+      // Deliberately the same message whether or not that address has an
+      // account: saying "no such account" would let anyone test which email
+      // addresses are registered here.
+      else setNotice('If that address has an account, a reset link is on its way.')
+      setBusy(false)
+      return
+    }
+
     const { error } =
       mode === 'in'
         ? await supabase.auth.signInWithPassword({ email, password })
@@ -34,6 +47,16 @@ export function SignIn() {
     setBusy(false)
   }
 
+  const heading =
+    mode === 'in' ? 'Open your vault' : mode === 'up' ? 'Create an account' : 'Reset your password'
+
+  const blurb =
+    mode === 'in'
+      ? 'The same account you use in the app. Your collection is already here.'
+      : mode === 'up'
+        ? 'Use this on the app too, it is one account for both.'
+        : 'Enter your email and we will send you a link to set a new one.'
+
   const field =
     'w-full rounded-xl border border-hairline bg-ink px-4 py-3 text-primary placeholder:text-tertiary focus:border-brass/70 focus:outline-none'
 
@@ -44,14 +67,8 @@ export function SignIn() {
       </Link>
 
       <div className="w-full max-w-sm rounded-2xl border border-hairline bg-surface p-7">
-        <h1 className="font-display mb-1.5 text-[1.4rem] font-bold text-primary">
-          {mode === 'in' ? 'Open your vault' : 'Create an account'}
-        </h1>
-        <p className="mb-7 text-[0.86rem] leading-relaxed text-secondary">
-          {mode === 'in'
-            ? 'The same account you use in the app. Your collection is already here.'
-            : 'Use this on the app too, it is one account for both.'}
-        </p>
+        <h1 className="font-display mb-1.5 text-[1.4rem] font-bold text-primary">{heading}</h1>
+        <p className="mb-7 text-[0.86rem] leading-relaxed text-secondary">{blurb}</p>
 
         <form onSubmit={submit} className="space-y-3">
           <input
@@ -63,15 +80,17 @@ export function SignIn() {
             onChange={(e) => setEmail(e.target.value)}
             className={field}
           />
-          <input
-            type="password"
-            required
-            autoComplete={mode === 'in' ? 'current-password' : 'new-password'}
-            placeholder="Password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            className={field}
-          />
+          {mode !== 'forgot' && (
+            <input
+              type="password"
+              required
+              autoComplete={mode === 'in' ? 'current-password' : 'new-password'}
+              placeholder="Password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className={field}
+            />
+          )}
 
           {error && <p className="text-[0.84rem] text-loss">{error}</p>}
           {notice && <p className="text-[0.84rem] text-gain">{notice}</p>}
@@ -81,21 +100,51 @@ export function SignIn() {
             disabled={busy}
             className="w-full cursor-pointer rounded-xl bg-gradient-to-b from-brass-bright to-brass py-3 font-semibold text-ink transition-opacity hover:opacity-90 disabled:opacity-50"
           >
-            {busy ? 'One moment…' : mode === 'in' ? 'Sign in' : 'Create account'}
+            {busy
+              ? 'One moment…'
+              : mode === 'in'
+                ? 'Sign in'
+                : mode === 'up'
+                  ? 'Create account'
+                  : 'Send reset link'}
           </button>
         </form>
 
-        <button
-          onClick={() => {
-            setMode(mode === 'in' ? 'up' : 'in')
-            setError(null)
-            setNotice(null)
-          }}
-          className="mt-5 w-full cursor-pointer text-[0.84rem] text-secondary transition-colors hover:text-primary"
-        >
-          {mode === 'in' ? 'No account yet? Create one' : 'Already have an account? Sign in'}
-        </button>
+        <div className="mt-5 space-y-2 text-center">
+          <button
+            onClick={() => {
+              setMode(mode === 'in' ? 'up' : 'in')
+              setError(null)
+              setNotice(null)
+            }}
+            className="w-full cursor-pointer text-[0.84rem] text-secondary transition-colors hover:text-primary"
+          >
+            {mode === 'in' ? 'No account yet? Create one' : 'Already have an account? Sign in'}
+          </button>
+          {mode !== 'forgot' && (
+            <button
+              onClick={() => {
+                setMode('forgot')
+                setError(null)
+                setNotice(null)
+              }}
+              className="w-full cursor-pointer text-[0.84rem] text-tertiary transition-colors hover:text-primary"
+            >
+              Forgotten your password?
+            </button>
+          )}
+        </div>
       </div>
+
+      <p className="mt-8 text-[0.76rem] text-tertiary">
+        <Link to="/privacy" className="transition-colors hover:text-secondary">
+          Privacy
+        </Link>
+        <span className="px-2">·</span>
+        <Link to="/terms" className="transition-colors hover:text-secondary">
+          Terms
+        </Link>
+      </p>
     </div>
   )
 }

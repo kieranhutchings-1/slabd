@@ -8,6 +8,9 @@ import { CardForm } from './pages/CardForm'
 import { Data } from './pages/Data'
 import { Soon } from './pages/Soon'
 import { Verify } from './pages/Verify'
+import { Privacy } from './pages/Privacy'
+import { Terms } from './pages/Terms'
+import { ResetPassword } from './pages/ResetPassword'
 
 /** The root path does double duty. A scanned QR arrives as `/?s=<serial>`
  *  and must show the verification page; everything else is the marketing
@@ -26,6 +29,9 @@ export default function App() {
       <Routes>
         <Route path="/" element={<Root />} />
         <Route path="/signin" element={<SignIn />} />
+        <Route path="/reset" element={<ResetPassword />} />
+        <Route path="/privacy" element={<Privacy />} />
+        <Route path="/terms" element={<Terms />} />
         <Route path="/vault" element={<Dashboard />} />
         <Route path="/vault/cards" element={<Cards />} />
         {/* `new` is declared before `:id` so it isn't captured as a card id. */}
