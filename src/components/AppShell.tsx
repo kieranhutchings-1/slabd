@@ -3,6 +3,7 @@ import { Link, NavLink, Navigate, useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../hooks/useAuth'
 import { useCurrency } from '../hooks/useCurrency'
+import { useCategories } from '../hooks/useCategories'
 import { Wordmark } from './Chrome'
 
 const nav = [
@@ -32,6 +33,9 @@ export function AppShell({
   // Subscribed here rather than per page: every `money()` call below reads
   // module state, so this is what makes a currency change repaint the vault.
   useCurrency()
+  // A brand-new account has no categories, so the card form's category picker
+  // would be empty with nothing explaining why. Send them through setup first.
+  const { categories, loading: categoriesLoading } = useCategories()
   const navigate = useNavigate()
 
   if (loading) {
@@ -42,6 +46,7 @@ export function AppShell({
     )
   }
   if (!session) return <Navigate to="/signin" replace />
+  if (!categoriesLoading && categories.length === 0) return <Navigate to="/vault/welcome" replace />
 
   return (
     <div className="min-h-screen bg-ink lg:flex">

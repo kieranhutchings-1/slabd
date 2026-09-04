@@ -2,6 +2,7 @@ import { BrowserRouter, Routes, Route, useSearchParams } from 'react-router-dom'
 import { Home } from './pages/Home'
 import { SignIn } from './pages/SignIn'
 import { Dashboard } from './pages/Dashboard'
+import { Welcome } from './pages/Welcome'
 import { Cards } from './pages/Cards'
 import { CardDetail } from './pages/CardDetail'
 import { CardForm } from './pages/CardForm'
@@ -13,6 +14,7 @@ import { Wants } from './pages/Wants'
 import { WantForm } from './pages/WantForm'
 import { Settings } from './pages/Settings'
 import { Verify } from './pages/Verify'
+import { Pricing } from './pages/Pricing'
 import { Privacy } from './pages/Privacy'
 import { Terms } from './pages/Terms'
 import { ResetPassword } from './pages/ResetPassword'
@@ -35,8 +37,11 @@ export default function App() {
         <Route path="/" element={<Root />} />
         <Route path="/signin" element={<SignIn />} />
         <Route path="/reset" element={<ResetPassword />} />
+        <Route path="/pricing" element={<Pricing />} />
         <Route path="/privacy" element={<Privacy />} />
         <Route path="/terms" element={<Terms />} />
+        {/* Declared before the other vault routes: first run has to win. */}
+        <Route path="/vault/welcome" element={<Welcome />} />
         <Route path="/vault" element={<Dashboard />} />
         <Route path="/vault/cards" element={<Cards />} />
         {/* `new` is declared before `:id` so it isn't captured as a card id. */}
