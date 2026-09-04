@@ -30,7 +30,7 @@ export const CATEGORY_SUGGESTIONS = [
   'Golf',
   'Pokemon',
   'One Piece',
-  'Magic: The Gathering',
+  'MTG',
   'Yu-Gi-Oh',
   'Dragon Ball',
   'Digimon',
