@@ -2,12 +2,11 @@ import { useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { AppShell } from '../components/AppShell'
 import { useCards } from '../hooks/useCards'
+import { useCategories } from '../hooks/useCategories'
 import { cardImageUrl } from '../lib/supabase'
 import { money, profitLoss } from '../lib/format'
 import { gradeName } from '../lib/types'
 import { DEFAULT_SORT, SORTS, sortCards, type Sort } from '../lib/sort'
-
-const CATEGORIES = ['All', 'Football', 'WWE', 'Pokemon', 'Other']
 
 /** The serial designation, as a compact badge for list rows. */
 function Tag({ card }: { card: { serial_kind: string | null; serial_num: string | null; serial_total: string | null; grade: string | null } }) {
@@ -32,6 +31,7 @@ function Tag({ card }: { card: { serial_kind: string | null; serial_num: string 
 
 export function Cards() {
   const { cards, loading, error } = useCards()
+  const { categories } = useCategories()
   const [query, setQuery] = useState('')
   const [category, setCategory] = useState('All')
   // Remembered per browser, the way the app remembers it per device — a
@@ -66,7 +66,7 @@ export function Cards() {
     >
       {/* Filters sit in one row above the content. */}
       <div className="mb-6 flex flex-wrap items-center gap-2">
-        {CATEGORIES.map((c) => (
+        {['All', ...categories.map((c) => c.name)].map((c) => (
           <button
             key={c}
             onClick={() => setCategory(c)}

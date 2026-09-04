@@ -1,16 +1,18 @@
 import { useEffect, useMemo, useState } from 'react'
-import { Link, useNavigate, useParams } from 'react-router-dom'
+import { Link, useLocation, useNavigate, useParams } from 'react-router-dom'
 import { AppShell } from '../components/AppShell'
 import { Slab } from '../components/Slab'
 import { Field, Section, Select, TextArea, TextInput, Toggle } from '../components/Field'
 import { useCard } from '../hooks/useCard'
 import { useCards } from '../hooks/useCards'
 import { useBreaks } from '../hooks/useBreaks'
+import { useCategories } from '../hooks/useCategories'
 import { PhotoPicker } from '../components/PhotoPicker'
+import { CategoryPicker } from '../components/CategoryPicker'
 import { cardImageUrl, supabase } from '../lib/supabase'
 import { deleteCardImage, uploadCardImage } from '../lib/images'
 import { reallocateSpots } from '../lib/allocate'
-import { AUTO_TYPES, CATEGORIES, GRADES, SERIAL_KINDS, SOURCES, STATUSES } from '../lib/options'
+import { AUTO_TYPES, GRADES, SERIAL_KINDS, SOURCES, STATUSES } from '../lib/options'
 import { gradeName } from '../lib/types'
 
 interface Draft {
@@ -38,7 +40,7 @@ interface Draft {
 
 const EMPTY: Draft = {
   player: '',
-  category: 'Football',
+  category: '',
   year: '',
   set_name: '',
   auto_type: 'Auto',
@@ -69,9 +71,11 @@ export function CardForm() {
   const { id } = useParams()
   const editing = Boolean(id)
   const navigate = useNavigate()
+  const location = useLocation()
   const { card, loading } = useCard(id)
   const { cards } = useCards()
   const { breaks, spots } = useBreaks()
+  const { categories } = useCategories()
 
   const [d, setD] = useState<Draft>(EMPTY)
   const [graded, setGraded] = useState(false)
@@ -92,7 +96,7 @@ export function CardForm() {
     if (!card) return
     setD({
       player: card.player ?? '',
-      category: card.category ?? 'Football',
+      category: card.category ?? '',
       year: card.year ?? '',
       set_name: card.set_name ?? '',
       auto_type: card.auto_type ?? 'Auto',
@@ -116,6 +120,22 @@ export function CardForm() {
   }, [card])
 
   const set = <K extends keyof Draft>(k: K, v: Draft[K]) => setD((p) => ({ ...p, [k]: v }))
+
+  // Arriving from "Mark as bought" on the want list, with the want's details
+  // already filled in. Price paid is left empty on purpose: what you hoped to
+  // pay is not what you paid.
+  useEffect(() => {
+    const prefill = (location.state as { prefill?: Partial<Draft> } | null)?.prefill
+    if (editing || !prefill) return
+    setD((p) => ({ ...p, ...prefill }))
+  }, [editing, location.state])
+
+  // A new card starts on your first category rather than a hardcoded one —
+  // "Football" is meaningless to somebody who collects Pokemon.
+  useEffect(() => {
+    if (editing || d.category || categories.length === 0) return
+    setD((p) => (p.category ? p : { ...p, category: categories[0].name }))
+  }, [editing, d.category, categories])
 
   // Spots labelled with their break, because a spot name on its own ("Man
   // Utd") says nothing about which break it belongs to.
@@ -293,7 +313,7 @@ export function CardForm() {
               </Field>
               <div className="grid gap-4 sm:grid-cols-2">
                 <Field label="Category">
-                  <Select value={d.category} onChange={(v) => set('category', v)} options={CATEGORIES} />
+                  <CategoryPicker value={d.category} onChange={(v) => set('category', v)} />
                 </Field>
                 <Field label="Year">
                   <TextInput value={d.year} onChange={(v) => set('year', v)} placeholder="2024-2025" />

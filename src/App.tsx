@@ -9,7 +9,9 @@ import { Data } from './pages/Data'
 import { Breaks } from './pages/Breaks'
 import { BreakDetail } from './pages/BreakDetail'
 import { BreakForm } from './pages/BreakForm'
-import { Soon } from './pages/Soon'
+import { Wants } from './pages/Wants'
+import { WantForm } from './pages/WantForm'
+import { Settings } from './pages/Settings'
 import { Verify } from './pages/Verify'
 import { Privacy } from './pages/Privacy'
 import { Terms } from './pages/Terms'
@@ -42,13 +44,15 @@ export default function App() {
         <Route path="/vault/cards/:id" element={<CardDetail />} />
         <Route path="/vault/cards/:id/edit" element={<CardForm />} />
         <Route path="/vault/data" element={<Data />} />
-        <Route path="/vault/wants" element={<Soon title="Want list" feature="Your want list" />} />
+        <Route path="/vault/wants" element={<Wants />} />
+        <Route path="/vault/wants/new" element={<WantForm />} />
+        <Route path="/vault/wants/:id/edit" element={<WantForm />} />
         <Route path="/vault/breaks" element={<Breaks />} />
         {/* `new` before `:id`, so it is not captured as a break id. */}
         <Route path="/vault/breaks/new" element={<BreakForm />} />
         <Route path="/vault/breaks/:id" element={<BreakDetail />} />
         <Route path="/vault/breaks/:id/edit" element={<BreakForm />} />
-        <Route path="/vault/settings" element={<Soon title="Settings" feature="Settings" />} />
+        <Route path="/vault/settings" element={<Settings />} />
         <Route path="*" element={<Root />} />
       </Routes>
     </BrowserRouter>
