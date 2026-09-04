@@ -4,6 +4,8 @@ import { useCards } from '../hooks/useCards'
 import { deriveStats } from '../lib/stats'
 import { money } from '../lib/format'
 import { cardImageUrl } from '../lib/supabase'
+import { useSnapshots } from '../hooks/useSnapshots'
+import { ValueChart } from '../components/ValueChart'
 
 /** A headline number. No plot, because a single value has nothing to compare
  *  against — a chart here would be decoration. */
@@ -86,6 +88,7 @@ function Panel({
 
 export function Dashboard() {
   const { cards, loading, error } = useCards()
+  const { snapshots, loading: snapshotsLoading } = useSnapshots()
   const s = deriveStats(cards)
 
   return (
@@ -168,9 +171,29 @@ export function Dashboard() {
           </div>
 
           <Panel
-            title="Status"
-            note="Value over time isn't shown because the database keeps no historical snapshots — only each card's current comp value."
+            title="Value over time"
+            note={
+              snapshots.length > 1
+                ? 'Recorded once a night. The gap between the two lines is your profit.'
+                : undefined
+            }
           >
+            {snapshotsLoading ? (
+              <div className="flex justify-center py-10">
+                <span className="h-5 w-5 animate-spin rounded-full border-2 border-hairline border-t-brass-bright" />
+              </div>
+            ) : snapshots.length > 1 ? (
+              <ValueChart data={snapshots} />
+            ) : (
+              // One point isn't a trend, and drawing it as one would be a lie.
+              <p className="py-6 text-[0.88rem] text-tertiary">
+                Tracking started today. Your collection's value is recorded every night, so this
+                chart fills in over the next few days.
+              </p>
+            )}
+          </Panel>
+
+          <Panel title="Status">
             <div className="flex flex-wrap gap-8">
               {s.byStatus.map((st) => (
                 <div key={st.label}>
