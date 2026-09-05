@@ -1,13 +1,19 @@
 import { Link } from 'react-router-dom'
 import { Footer, Nav } from '../components/Chrome'
+import { AppOnly } from '../components/PlatformBadge'
 import { useAuth } from '../hooks/useAuth'
 
 /** What each plan includes.
  *
  *  `free` is what the free tier gets; anything false is Premium only. Kept as
  *  data rather than two hand-written lists so the two columns can never drift
- *  apart and claim different things. */
-const FEATURES: { label: string; detail?: string; free: boolean | string }[] = [
+ *  apart and claim different things.
+ *
+ *  `app` marks a row the web vault does not have. A plan and a platform are
+ *  different questions, so it is a separate field rather than a fourth column:
+ *  paying for Premium does not put the insurance PDF in a browser, and the
+ *  table should not imply it does. */
+const FEATURES: { label: string; detail?: string; free: boolean | string; app?: boolean }[] = [
   { label: 'Cards', detail: 'How many you can log', free: '75' },
   { label: 'Digital slab labels', detail: 'Every card gets one', free: true },
   { label: 'Serial and QR code', detail: 'A public page per card', free: true },
@@ -18,7 +24,7 @@ const FEATURES: { label: string; detail?: string; free: boolean | string }[] = [
   { label: 'Export your data', detail: 'CSV, whenever you like', free: true },
   { label: 'Import from CSV', detail: 'Bring a collection with you', free: false },
   { label: 'Break tracking', detail: 'Spots, hits and cost per hit', free: false },
-  { label: 'Insurance report', detail: 'A PDF of the whole collection', free: false },
+  { label: 'Insurance report', detail: 'A PDF of the whole collection', free: false, app: true },
   { label: 'Value over time', detail: 'Recorded nightly', free: false },
 ]
 
@@ -140,7 +146,10 @@ export function Pricing() {
                 {FEATURES.map((f) => (
                   <tr key={f.label}>
                     <td className="border-b border-hairline px-4 py-3">
-                      <span className="text-primary">{f.label}</span>
+                      <span className="flex items-center gap-2">
+                        <span className="text-primary">{f.label}</span>
+                        {f.app && <AppOnly />}
+                      </span>
                       {f.detail && (
                         <span className="block text-[0.8rem] text-tertiary">{f.detail}</span>
                       )}
@@ -172,6 +181,16 @@ export function Pricing() {
               </tbody>
             </table>
           </div>
+
+          {/* The tick columns answer "which plan", not "which device". Without
+              this the two questions read as one, and a web subscriber goes
+              looking for an export that was never in a browser. */}
+          <p className="mt-5 text-[0.86rem] leading-relaxed text-tertiary">
+            Plans cover both platforms: one account, one collection, whether you open it on your
+            phone or in a browser. Rows marked{' '}
+            <AppOnly decorative className="mx-0.5 align-middle" /> are in the iPhone app only, and
+            everything else works in both.
+          </p>
         </section>
 
         <section className="mt-14 grid gap-8 border-t border-hairline pt-10 sm:grid-cols-2">

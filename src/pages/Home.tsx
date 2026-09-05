@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom'
 import { Slab } from '../components/Slab'
 import { Footer, Nav } from '../components/Chrome'
+import { AppOnly } from '../components/PlatformBadge'
 import { heroCard } from '../lib/demo'
 
 function Rule({ label }: { label: string }) {
@@ -15,18 +16,22 @@ function Rule({ label }: { label: string }) {
   )
 }
 
-const features = [
+/** `app` marks a feature the web vault does not have. Held as data next to the
+ *  copy so a feature and its platform can never drift apart, the same reason
+ *  the pricing tiers are built from a list rather than written out twice. */
+const features: { title: string; body: string; app?: boolean }[] = [
   {
     title: 'Every card, catalogued',
-    body: 'Player, year, set, parallel and print run. Photograph it once with the guided camera and it is logged, sorted and searchable.',
+    body: 'Player, year, set, parallel and print run. Photograph it once with the guided camera in the app and it is logged, sorted and searchable from your phone or any browser.',
   },
   {
     title: 'What it is worth',
-    body: 'Pull live market comparables from eBay, record what you paid, and see profit and loss across the whole collection rather than guessing.',
+    body: 'Pull live market comparables from eBay in the app, record what you paid, and see profit and loss across the whole collection on either side.',
   },
   {
     title: 'Grade before you send',
     body: 'An on-device estimate of centering, corners, edges and surface, so you know whether a card is worth the grading fee first.',
+    app: true,
   },
   {
     title: 'Break tracking',
@@ -35,6 +40,7 @@ const features = [
   {
     title: 'Insurance-ready records',
     body: 'Export the collection as a formatted PDF with photos and values, ready to hand to an insurer or attach to a claim.',
+    app: true,
   },
   {
     title: 'Share a card, not your account',
@@ -42,11 +48,12 @@ const features = [
   },
 ]
 
-const steps = [
+const steps: { n: string; title: string; body: string; app?: boolean }[] = [
   {
     n: '01',
     title: 'Photograph the card',
     body: 'The guided camera frames to real card dimensions and waits for focus, so the shot is square and sharp.',
+    app: true,
   },
   {
     n: '02',
@@ -134,9 +141,10 @@ export function Home() {
                 <div className="font-display mb-4 text-[2.4rem] leading-none font-black text-brass/35">
                   {s.n}
                 </div>
-                <h3 className="font-display mb-2.5 text-[1.15rem] font-bold text-primary">
-                  {s.title}
-                </h3>
+                <div className="mb-2.5 flex items-center justify-center gap-2.5 md:justify-start">
+                  <h3 className="font-display text-[1.15rem] font-bold text-primary">{s.title}</h3>
+                  {s.app && <AppOnly />}
+                </div>
                 <p className="text-[0.94rem] leading-relaxed text-secondary">{s.body}</p>
               </div>
             ))}
@@ -148,12 +156,22 @@ export function Home() {
       <section id="features" className="border-t border-hairline/70 px-5 py-24">
         <div className="mx-auto max-w-6xl">
           <Rule label="Everything in one place" />
+          {/* Says which half is which before the grid does, so a badge on a
+              card reads as a platform mark rather than an unexplained label. */}
+          <p className="mx-auto mb-10 max-w-2xl text-center text-[0.94rem] leading-relaxed text-secondary">
+            The iPhone app captures, grades and prices your cards. The web vault opens the same
+            collection on a bigger screen for the bulk work. One account, one collection; anything
+            marked <AppOnly decorative className="mx-0.5 align-middle" /> needs the app.
+          </p>
           <div className="grid gap-px overflow-hidden rounded-2xl border border-hairline bg-hairline sm:grid-cols-2 lg:grid-cols-3">
             {features.map((f) => (
               <div key={f.title} className="bg-surface p-7 transition-colors hover:bg-raised">
-                <h3 className="font-display mb-2.5 text-[1.05rem] font-bold text-brass-bright">
-                  {f.title}
-                </h3>
+                <div className="mb-2.5 flex items-start justify-between gap-3">
+                  <h3 className="font-display text-[1.05rem] font-bold text-brass-bright">
+                    {f.title}
+                  </h3>
+                  {f.app && <AppOnly className="mt-1" />}
+                </div>
                 <p className="text-[0.92rem] leading-relaxed text-secondary">{f.body}</p>
               </div>
             ))}
