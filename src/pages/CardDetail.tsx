@@ -161,10 +161,16 @@ export function CardDetail() {
                       ['Sold date', formatDate(card.sold_date)],
                     ] as [string, string][])
                   : []),
-                [
-                  profitLoss(card) >= 0 ? 'Up on cost' : 'Down on cost',
-                  `${profitLoss(card) >= 0 ? '+' : '−'}${money(Math.abs(profitLoss(card)))}`,
-                ],
+                // Null means the card has no valuation yet, which is not the
+                // same as breaking even.
+                (() => {
+                  const pl = profitLoss(card)
+                  if (pl == null) return ['Up or down', 'Not valued yet'] as [string, string]
+                  return [
+                    pl >= 0 ? 'Up on cost' : 'Down on cost',
+                    `${pl >= 0 ? '+' : '−'}${money(Math.abs(pl))}`,
+                  ] as [string, string]
+                })(),
               ]}
             />
 

@@ -136,6 +136,14 @@ export function Cards() {
       )}
 
       {!loading && !error && filtered.length > 0 && (
+        <>
+        {/* The two figures on the right are unreadable without being named
+            once. A header rather than a label per row: at 78 rows the repeated
+            text would swamp the list it's meant to explain. */}
+        <div className="mb-2 flex items-baseline justify-end gap-4 px-4 text-[0.7rem] tracking-[0.1em] text-tertiary uppercase">
+          <span>Value</span>
+          <span className="w-20 text-right">Profit</span>
+        </div>
         <ul className="divide-y divide-hairline overflow-hidden rounded-2xl border border-hairline bg-surface">
           {filtered.map((c) => {
             const pl = profitLoss(c)
@@ -171,13 +179,19 @@ export function Cards() {
 
                 <div className="shrink-0 text-right">
                   <p className="figures text-[0.92rem] text-primary">{money(c.comp_value)}</p>
-                  <p
-                    className={`figures text-[0.78rem] ${pl >= 0 ? 'text-gain' : 'text-loss'}`}
-                    title={pl >= 0 ? 'Up on what you paid' : 'Down on what you paid'}
-                  >
-                    {pl >= 0 ? '+' : '−'}
-                    {money(Math.abs(pl))}
-                  </p>
+                  {pl == null ? (
+                    <p className="text-[0.78rem] text-tertiary" title="No comp value recorded yet">
+                      Not valued
+                    </p>
+                  ) : (
+                    <p
+                      className={`figures text-[0.78rem] ${pl >= 0 ? 'text-gain' : 'text-loss'}`}
+                      title={pl >= 0 ? 'Up on what you paid' : 'Down on what you paid'}
+                    >
+                      {pl >= 0 ? '+' : '−'}
+                      {money(Math.abs(pl))}
+                    </p>
+                  )}
                 </div>
 
                 <span className="shrink-0 text-tertiary">›</span>
@@ -186,6 +200,7 @@ export function Cards() {
             )
           })}
         </ul>
+        </>
       )}
     </AppShell>
   )

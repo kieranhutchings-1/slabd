@@ -19,7 +19,8 @@ export function deriveStats(cards: Card[]): Stats {
   const held = cards.filter((c) => c.status !== 'Sold')
   const totalPaid = cards.reduce((s, c) => s + (c.price_paid ?? 0), 0)
   const heldValue = held.reduce((s, c) => s + (c.comp_value ?? 0), 0)
-  const profit = cards.reduce((s, c) => s + profitLoss(c), 0)
+  // Unvalued cards contribute nothing rather than a phantom loss.
+  const profit = cards.reduce((s, c) => s + (profitLoss(c) ?? 0), 0)
 
   const catMap = new Map<string, { value: number; count: number }>()
   for (const c of held) {
