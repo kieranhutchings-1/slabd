@@ -1,6 +1,8 @@
 import { useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { AppShell } from '../components/AppShell'
+import { CardLimitNotice } from '../components/Upgrade'
+import { usePlan } from '../hooks/usePlan'
 import { useCards } from '../hooks/useCards'
 import { useCategories } from '../hooks/useCategories'
 import { cardThumbUrl } from '../lib/supabase'
@@ -32,6 +34,7 @@ function Tag({ card }: { card: { serial_kind: string | null; serial_num: string 
 export function Cards() {
   const { cards, loading, error } = useCards()
   const { categories } = useCategories()
+  const { plan } = usePlan()
   const [query, setQuery] = useState('')
   const [category, setCategory] = useState('All')
   // Remembered per browser, the way the app remembers it per device — a
@@ -116,6 +119,8 @@ export function Cards() {
           Add card
         </Link>
       </div>
+
+      {plan === 'free' && <CardLimitNotice count={cards.length} />}
 
       {loading && (
         <div className="flex justify-center py-20">

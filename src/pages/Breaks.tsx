@@ -1,5 +1,7 @@
 import { Link } from 'react-router-dom'
 import { AppShell } from '../components/AppShell'
+import { PremiumPanel } from '../components/Upgrade'
+import { usePlan } from '../hooks/usePlan'
 import { useBreaks } from '../hooks/useBreaks'
 import { useCards } from '../hooks/useCards'
 import { deriveBreakStats, orderBreaks, percent } from '../lib/breaks'
@@ -27,11 +29,22 @@ function HitRate({ rate }: { rate: number | null }) {
 }
 
 export function Breaks() {
+  const { allows } = usePlan()
   const { breaks, spots, loading, error } = useBreaks()
   const { cards, loading: cardsLoading } = useCards()
   const s = deriveBreakStats(breaks, spots, cards)
   const ordered = orderBreaks(breaks)
   const busy = loading || cardsLoading
+
+  // The page is replaced wholesale rather than having its buttons disabled:
+  // a screen full of dead controls explains nothing.
+  if (!allows('breaks')) {
+    return (
+      <AppShell title="Breaks" subtitle="What you paid into breaks, and what came out.">
+        <PremiumPanel feature="breaks" />
+      </AppShell>
+    )
+  }
 
   return (
     <AppShell title="Breaks" subtitle="What you paid into breaks, and what came out.">
