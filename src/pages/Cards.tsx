@@ -145,8 +145,13 @@ export function Cards() {
         <div className="mb-2 hidden items-baseline gap-4 px-4 text-[0.7rem] tracking-[0.1em] text-tertiary uppercase sm:flex">
           <span className="w-12 shrink-0" aria-hidden="true" />
           <span className="flex-1" />
+          {/* Cost first: the row then reads left to right as the sum it is —
+              what you paid, what it's worth, the difference. Cost is the one
+              that drops on narrower screens, since it's the only one you can
+              derive from the other two. */}
+          <span className="hidden w-24 shrink-0 text-right md:block">Cost</span>
           <span className="w-24 shrink-0 text-right">Value</span>
-          <span className="w-24 shrink-0 text-right">Profit</span>
+          <span className="w-24 shrink-0 text-right">P/L</span>
           <span className="w-2 shrink-0" aria-hidden="true" />
         </div>
         <ul className="divide-y divide-hairline overflow-hidden rounded-2xl border border-hairline bg-surface">
@@ -183,6 +188,9 @@ export function Cards() {
                 </div>
 
                 <div className="flex shrink-0 flex-col items-end gap-0 text-right sm:flex-row sm:items-baseline sm:gap-4">
+                  <p className="figures hidden w-24 shrink-0 text-[0.92rem] text-secondary md:block">
+                    {money(c.price_paid)}
+                  </p>
                   <p className="figures w-24 shrink-0 text-[0.92rem] text-primary">
                     {money(c.comp_value)}
                   </p>
