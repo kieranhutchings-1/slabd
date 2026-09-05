@@ -137,12 +137,17 @@ export function Cards() {
 
       {!loading && !error && filtered.length > 0 && (
         <>
-        {/* The two figures on the right are unreadable without being named
-            once. A header rather than a label per row: at 78 rows the repeated
-            text would swamp the list it's meant to explain. */}
-        <div className="mb-2 flex items-baseline justify-end gap-4 px-4 text-[0.7rem] tracking-[0.1em] text-tertiary uppercase">
-          <span>Value</span>
-          <span className="w-20 text-right">Profit</span>
+        {/* Named once here rather than on every row — at 78 rows the repeated
+            labels would swamp the list they're meant to explain. The widths,
+            gap and padding below mirror the row exactly so each word sits over
+            its own column. Hidden on narrow screens, where the two figures
+            stack instead of sitting side by side. */}
+        <div className="mb-2 hidden items-baseline gap-4 px-4 text-[0.7rem] tracking-[0.1em] text-tertiary uppercase sm:flex">
+          <span className="w-12 shrink-0" aria-hidden="true" />
+          <span className="flex-1" />
+          <span className="w-24 shrink-0 text-right">Value</span>
+          <span className="w-24 shrink-0 text-right">Profit</span>
+          <span className="w-2 shrink-0" aria-hidden="true" />
         </div>
         <ul className="divide-y divide-hairline overflow-hidden rounded-2xl border border-hairline bg-surface">
           {filtered.map((c) => {
@@ -177,15 +182,22 @@ export function Cards() {
                   )}
                 </div>
 
-                <div className="shrink-0 text-right">
-                  <p className="figures text-[0.92rem] text-primary">{money(c.comp_value)}</p>
+                <div className="flex shrink-0 flex-col items-end gap-0 text-right sm:flex-row sm:items-baseline sm:gap-4">
+                  <p className="figures w-24 shrink-0 text-[0.92rem] text-primary">
+                    {money(c.comp_value)}
+                  </p>
                   {pl == null ? (
-                    <p className="text-[0.78rem] text-tertiary" title="No comp value recorded yet">
+                    <p
+                      className="w-24 shrink-0 text-[0.78rem] text-tertiary"
+                      title="No comp value recorded yet"
+                    >
                       Not valued
                     </p>
                   ) : (
                     <p
-                      className={`figures text-[0.78rem] ${pl >= 0 ? 'text-gain' : 'text-loss'}`}
+                      className={`figures w-24 shrink-0 text-[0.78rem] sm:text-[0.92rem] ${
+                        pl >= 0 ? 'text-gain' : 'text-loss'
+                      }`}
                       title={pl >= 0 ? 'Up on what you paid' : 'Down on what you paid'}
                     >
                       {pl >= 0 ? '+' : '−'}
@@ -194,7 +206,7 @@ export function Cards() {
                   )}
                 </div>
 
-                <span className="shrink-0 text-tertiary">›</span>
+                <span className="w-2 shrink-0 text-center text-tertiary">›</span>
                 </Link>
               </li>
             )
