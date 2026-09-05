@@ -168,6 +168,15 @@ export function Data() {
           columns are ignored. The Slabd serial is exported for reference but never imported, because
           the database owns it.
         </p>
+        <p className="mt-3 text-[0.88rem] text-secondary">
+          <strong className="text-primary">Dates in the file are ISO — 2026-08-18</strong>, even
+          though the app shows them as 18/08/2026. That's deliberate:{' '}
+          <span className="figures">05/09/2026</span> and{' '}
+          <span className="figures">09/05/2026</span> are indistinguishable to a spreadsheet, which
+          reads them by its own regional settings and can silently change the day and month round.
+          ISO can only mean one thing. If you do edit a date by hand, either format is accepted on
+          import.
+        </p>
         <div className="mt-4 overflow-x-auto">
           <code className="font-mono text-[0.76rem] whitespace-nowrap text-tertiary">
             {CSV_COLUMNS.join(', ')}
