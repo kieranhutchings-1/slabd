@@ -3,7 +3,7 @@ import { AppShell } from '../components/AppShell'
 import { useBreaks } from '../hooks/useBreaks'
 import { useCards } from '../hooks/useCards'
 import { deriveBreakStats, orderBreaks, percent } from '../lib/breaks'
-import { money, signedMoney } from '../lib/format'
+import { money, signedMoney, formatDate } from '../lib/format'
 
 function Stat({ label, value, note }: { label: string; value: string; note?: string }) {
   return (
@@ -148,7 +148,7 @@ export function Breaks() {
                           {brk.name}
                         </p>
                         <p className="mt-0.5 truncate text-[0.8rem] text-secondary">
-                          {[brk.break_date, brk.seller].filter((v) => v && v.trim()).join(' · ') ||
+                          {[brk.break_date && formatDate(brk.break_date), brk.seller].filter((v) => v && v.trim()).join(' · ') ||
                             'No date or seller'}
                         </p>
                         <p className="mt-0.5 text-[0.76rem] text-tertiary">
