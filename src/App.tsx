@@ -15,6 +15,7 @@ import { WantForm } from './pages/WantForm'
 import { Settings } from './pages/Settings'
 import { Verify } from './pages/Verify'
 import { Pricing } from './pages/Pricing'
+import { Roadmap } from './pages/Roadmap'
 import { Privacy } from './pages/Privacy'
 import { Terms } from './pages/Terms'
 import { ResetPassword } from './pages/ResetPassword'
@@ -38,6 +39,7 @@ export default function App() {
         <Route path="/signin" element={<SignIn />} />
         <Route path="/reset" element={<ResetPassword />} />
         <Route path="/pricing" element={<Pricing />} />
+        <Route path="/roadmap" element={<Roadmap />} />
         <Route path="/privacy" element={<Privacy />} />
         <Route path="/terms" element={<Terms />} />
         {/* Declared before the other vault routes: first run has to win. */}
