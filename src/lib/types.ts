@@ -44,19 +44,6 @@ export interface PublicCard {
   imageUrl: string | null
 }
 
-export const SERIAL_KIND = {
-  base: 'Base',
-  serial: 'Serial',
-  ssp: 'SSP',
-  caseHit: 'Case Hit',
-} as const
-
-export const STATUS = {
-  kept: 'Kept',
-  forSale: 'For Sale',
-  sold: 'Sold',
-} as const
-
 /** PSA-style grade names, matching `VaultSlabFrame.gradeNames` in the app. */
 export const GRADE_NAMES: Record<string, string> = {
   '10': 'Gem Mint',

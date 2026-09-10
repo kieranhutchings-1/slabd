@@ -49,7 +49,7 @@ const DATES = new Set(['date_acquired', 'sold_date'])
  *
  *  An unrecognised value is passed through rather than dropped, so the
  *  database rejects it visibly instead of the row losing a date quietly. */
-function normalizeDate(raw: string): string {
+export function normalizeDate(raw: string): string {
   const v = raw.trim()
   if (/^\d{4}-\d{2}-\d{2}$/.test(v)) return v
 

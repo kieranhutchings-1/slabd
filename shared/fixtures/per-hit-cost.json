@@ -1,0 +1,13 @@
+{
+  "rule": "A break spot's cost split evenly across the cards it hit, rounded to the penny. This is the number written to each linked card's price_paid, which is what keeps Total Paid correct without break-sourced cards needing special handling. A spot with no hits has no per-hit cost at all.",
+  "cases": [
+    { "cost": 100, "hits": 3, "expect": 33.33, "why": "recurring decimal, rounded down at the penny" },
+    { "cost": 100, "hits": 0, "expect": null, "why": "no hits means no allocation, not zero" },
+    { "cost": 10, "hits": 4, "expect": 2.5, "why": "divides cleanly" },
+    { "cost": 100, "hits": 1, "expect": 100, "why": "one hit carries the whole cost" },
+    { "cost": 0.05, "hits": 2, "expect": 0.03, "why": "exact half penny: rounds away from zero, not to even" },
+    { "cost": 1, "hits": 3, "expect": 0.33, "why": "small amounts still land on the penny" },
+    { "cost": 99.99, "hits": 7, "expect": 14.28, "why": "awkward division" },
+    { "cost": 0, "hits": 5, "expect": 0, "why": "a free spot allocates nothing" }
+  ]
+}

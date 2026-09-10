@@ -3,8 +3,6 @@
  *  agree exactly or a card added on the web shows a blank picker on the
  *  phone. */
 
-export const CATEGORIES = ['Football', 'WWE', 'Pokemon', 'Other'] as const
-
 export const AUTO_TYPES = [
   'Auto',
   'On Card Auto',

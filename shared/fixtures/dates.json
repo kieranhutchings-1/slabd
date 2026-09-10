@@ -1,0 +1,18 @@
+{
+  "rule": "Normalise a date from a CSV cell to the ISO form Postgres expects. An unrecognised value is passed through unchanged, so the database rejects it visibly instead of the row quietly losing its date.",
+  "cases": [
+    { "input": "2026-08-14", "expect": "2026-08-14", "why": "already ISO, untouched" },
+    { "input": "14/08/2026", "expect": "2026-08-14", "why": "UK day-first, the common case" },
+    { "input": "03/04/2026", "expect": "2026-04-03", "why": "ambiguous: day-first wins, so this is 3 April" },
+    { "input": "08/14/2026", "expect": "2026-08-14", "why": "second number cannot be a month, so read month-first" },
+    { "input": "14/08/26", "expect": "2026-08-14", "why": "two-digit year assumes this century" },
+    { "input": "2026/08/14", "expect": "2026-08-14", "why": "four-digit first number means year-first" },
+    { "input": "14.08.2026", "expect": "2026-08-14", "why": "dots separate too" },
+    { "input": "14-08-2026", "expect": "2026-08-14", "why": "dashes that are not ISO" },
+    { "input": "1/2/26", "expect": "2026-02-01", "why": "single digits, still day-first" },
+    { "input": "  14/08/2026  ", "expect": "2026-08-14", "why": "surrounding whitespace is trimmed" },
+    { "input": "32/13/2026", "expect": "32/13/2026", "why": "no valid reading, passed through to be rejected" },
+    { "input": "not a date", "expect": "not a date", "why": "not date-shaped, passed through" },
+    { "input": "", "expect": "", "why": "empty stays empty" }
+  ]
+}

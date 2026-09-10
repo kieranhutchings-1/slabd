@@ -63,9 +63,6 @@ export function setCurrencyLocally(code: CurrencyCode) {
   listeners.forEach((fn) => fn())
 }
 
-export const currencySymbol = () =>
-  ({ GBP: '£', USD: '$', EUR: '€' })[current]
-
 export function formatMoney(value: number | null | undefined) {
   if (value == null) return '—'
   return new Intl.NumberFormat(LOCALES[current], {

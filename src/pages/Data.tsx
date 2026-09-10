@@ -69,10 +69,12 @@ export function Data() {
       // security would reject the write anyway.
       if (row.id && existing.has(row.id)) {
         const { error } = await supabase.from('cards').update(row.values).eq('id', row.id)
-        error ? failed++ : updated++
+        if (error) failed++
+        else updated++
       } else {
         const { error } = await supabase.from('cards').insert({ ...row.values, user_id: userId })
-        error ? failed++ : added++
+        if (error) failed++
+        else added++
       }
     }
 

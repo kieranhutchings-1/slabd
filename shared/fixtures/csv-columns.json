@@ -1,0 +1,31 @@
+{
+  "rule": "Column order and names for CSV export and import. Both sides match columns by header name rather than position, so a file's column order does not matter and extra columns are ignored. Two columns are export-only because the database owns them: id, and unique_serial (unique-constrained, so writing it back would either collide or hand one card another card's identity).",
+  "columns": [
+    "id",
+    "player",
+    "category",
+    "year",
+    "set_name",
+    "auto_type",
+    "serial_num",
+    "serial_total",
+    "serial_kind",
+    "source",
+    "seller",
+    "price_paid",
+    "date_acquired",
+    "comp_value",
+    "comp_notes",
+    "status",
+    "sold_price",
+    "sold_date",
+    "notes",
+    "grade",
+    "unique_serial"
+  ],
+  "export_only": [
+    "id",
+    "unique_serial"
+  ],
+  "required_for_a_row_to_count_as_a_card": "player"
+}
