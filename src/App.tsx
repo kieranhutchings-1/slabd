@@ -8,6 +8,9 @@ import { CardDetail } from './pages/CardDetail'
 import { CardForm } from './pages/CardForm'
 import { Data } from './pages/Data'
 import { Breaks } from './pages/Breaks'
+import { Wax } from './pages/Wax'
+import { WaxForm } from './pages/WaxForm'
+import { WaxDetail } from './pages/WaxDetail'
 import { BreakDetail } from './pages/BreakDetail'
 import { BreakForm } from './pages/BreakForm'
 import { Wants } from './pages/Wants'
@@ -55,6 +58,10 @@ export default function App() {
         <Route path="/vault/wants/new" element={<WantForm />} />
         <Route path="/vault/wants/:id/edit" element={<WantForm />} />
         <Route path="/vault/breaks" element={<Breaks />} />
+        <Route path="/vault/wax" element={<Wax />} />
+        <Route path="/vault/wax/new" element={<WaxForm />} />
+        <Route path="/vault/wax/:id" element={<WaxDetail />} />
+        <Route path="/vault/wax/:id/edit" element={<WaxForm />} />
         {/* `new` before `:id`, so it is not captured as a break id. */}
         <Route path="/vault/breaks/new" element={<BreakForm />} />
         <Route path="/vault/breaks/:id" element={<BreakDetail />} />

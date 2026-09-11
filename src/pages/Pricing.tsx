@@ -18,6 +18,7 @@ const FEATURES: { label: string; detail?: string; free: boolean | string }[] = [
   { label: 'Export your data', detail: 'CSV, whenever you like', free: true },
   { label: 'Import from CSV', detail: 'Bring a collection with you', free: false },
   { label: 'Break tracking', detail: 'Spots, hits and cost per hit', free: false },
+  { label: 'Sealed wax', detail: 'Track boxes, then split the cost across your hits', free: false },
   { label: 'Insurance report', detail: 'A PDF of the whole collection', free: false },
   { label: 'Value over time', detail: 'Recorded nightly', free: false },
 ]

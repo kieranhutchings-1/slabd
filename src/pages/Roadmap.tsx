@@ -42,6 +42,11 @@ const ITEMS: { status: Status; title: string; body: string }[] = [
   },
   {
     status: 'done',
+    title: 'Sealed wax',
+    body: 'Track a box while it is sealed, including what you paid against retail and what a sealed one goes for now. Open it and the cost divides across the cards you log from it, the same way a break spot does.',
+  },
+  {
+    status: 'done',
     title: 'The web companion',
     body: 'The same vault in a browser, for typing up batches on a keyboard and importing a spreadsheet.',
   },

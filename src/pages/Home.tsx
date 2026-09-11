@@ -34,6 +34,10 @@ const features = [
     body: 'Buy into a break, log the spots and hits, and see the real cost per card once a box is split rather than a lump sum.',
   },
   {
+    title: 'Sealed wax',
+    body: 'Log a box while it is sealed and track what it is worth. Open it and what you paid spreads across the cards you pull, so you know whether the box beat its price.',
+  },
+  {
     title: 'Insurance-ready records',
     body: 'Export the collection as a formatted PDF with photos and values, ready to hand to an insurer or attach to a claim.',
   },

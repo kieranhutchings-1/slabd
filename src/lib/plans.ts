@@ -9,10 +9,11 @@ export type Plan = 'founding' | 'free' | 'pro'
  *  wasn't there. */
 export const FREE_CARD_LIMIT = 75
 
-export type Feature = 'breaks' | 'insuranceReport' | 'csvImport'
+export type Feature = 'breaks' | 'wax' | 'insuranceReport' | 'csvImport'
 
 export const FEATURE_NAMES: Record<Feature, string> = {
   breaks: 'Break tracking',
+  wax: 'Wax tracking',
   insuranceReport: 'The insurance report',
   csvImport: 'CSV import',
 }
@@ -20,7 +21,7 @@ export const FEATURE_NAMES: Record<Feature, string> = {
 /** Free gets everything that isn't listed here. Export is deliberately absent:
  *  getting your own data out is never gated — it's how you exercise your data
  *  rights, and the privacy policy says so. */
-const PREMIUM_ONLY: Feature[] = ['breaks', 'insuranceReport', 'csvImport']
+const PREMIUM_ONLY: Feature[] = ['breaks', 'wax', 'insuranceReport', 'csvImport']
 
 export const isPaid = (plan: Plan | null) => plan === 'founding' || plan === 'pro'
 
